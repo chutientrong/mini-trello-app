@@ -1,9 +1,69 @@
 # Mini Trello App - Project Documentation
 
-## 📋 Table of Contents
+## Project Structure
+```
+mini-trello-app/
+├── backend/                 # Node.js/Express backend
+│   ├── src/
+│   │   ├── config/         # Configuration files
+│   │   ├── controllers/    # Route controllers
+│   │   ├── middlewares/    # Express middlewares
+│   │   ├── models/         # Data models
+│   │   ├── routes/         # API routes
+│   │   ├── services/       # Business logic
+│   │   ├── socket/         # WebSocket handlers
+│   │   ├── utils/          # Utility functions
+│   │   └── validations/    # Request validation schemas
+│   ├── env.example         # Environment variables template
+│   └── package.json
+├── frontend/               # React frontend
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   ├── contexts/       # React contexts
+│   │   ├── features/       # Feature-based modules
+│   │   │   ├── auth/       # Authentication
+│   │   │   ├── boards/     # Board management
+│   │   │   ├── cards/      # Card management
+│   │   │   ├── tasks/      # Task management
+│   │   │   ├── github/     # GitHub integration
+│   │   │   └── notifications/ # Notifications
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── layouts/        # Layout components
+│   │   ├── pages/          # Page components
+│   │   ├── routes/         # Routing configuration
+│   │   ├── services/       # API services
+│   │   ├── store/          # State management
+│   │   ├── styles/         # Global styles
+│   │   ├── types/          # TypeScript types
+│   │   └── utils/          # Utility functions
+│   ├── env.example         # Environment variables template
+│   └── package.json
+├── docs/                   # Documentation
+```
+
+## Technology Stack
+
+### Backend
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **Socket.IO** - Real-time communication
+- **Firebase** - Database 
+- **Passport** - Oauth
+- **JWT** - Token-based authentication
+
+### Frontend
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **React Query** - Data fetching and caching
+- **React Router** - Client-side routing
+- **Tailwind CSS** - Utility-first CSS framework
+- **Socket.IO Client** - Real-time communication
+
+## Getting Started
 
 ### Prerequisites
-- Node.js (v18 or higher)
+- Node.js (v20 or higher)
 - npm or yarn
 - Firebase project setup
 - GitHub Oauth setup
@@ -74,12 +134,11 @@
 
 1. **Create a GitHub OAuth App**
    - Go to [GitHub Developer Settings](https://github.com/settings/developers)
-   - Click "New OAuth App"
+   - Click "OAuth Apps" -> "New OAuth App"
    - Fill in the application details:
      - **Application name**: Mini Trello App
      - **Homepage URL**: `http://localhost:5173` 
      - **Authorization callback URL**: `http://localhost:5173/auth/github/callback`
-     - **Description**: Real-time collaborative task management app
 
 2. **Get OAuth Credentials**
    - After creating the app, you'll get:
