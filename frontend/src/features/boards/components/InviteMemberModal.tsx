@@ -101,7 +101,7 @@ const InviteMemberModalComponent: React.FC<InviteMemberModalProps> = ({
             <div className="flex items-center">
               <Check className="h-5 w-5 text-green-600 mr-2" />
               <p className="text-sm text-green-800">
-                Invitation sent successfully! The recipient will receive an email with the invitation link.
+                Invitation sent successfully! The recipient will receive a notification.
               </p>
             </div>
           </div>
