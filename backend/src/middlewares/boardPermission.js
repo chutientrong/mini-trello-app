@@ -13,15 +13,8 @@ const checkBoardPermission = (operation) => {
       const { boardId } = req.params;
       const userId = req.user.id;
 
-      // only board owners can create boards
+      // any authenticated user can create boards
       if (operation === "create") {
-        const userBoards = await Board.find("boards", { ownerId: userId });
-        if (userBoards.length === 0) {
-          throw new ApiError(
-            httpStatus.FORBIDDEN,
-            "Access denied: Only board owners can create new boards"
-          );
-        }
         return next();
       }
 

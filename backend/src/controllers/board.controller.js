@@ -1,6 +1,6 @@
 const { status: httpStatus } = require("http-status");
 const catchAsync = require("../utils/catchAsync");
-const { boardService } = require("../services/board.service");
+const boardService = require("../services/board.service");
 
 const createBoard = catchAsync(async (req, res) => {
   const userId = req.user.id;

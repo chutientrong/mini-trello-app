@@ -325,73 +325,76 @@ class BoardService extends BaseService {
       total: members.length,
     };
   }
+
+  // Set GitHub repository for a board
+  async setBoardGitHubRepository(boardId, userId, repositoryData) {
+    const board = await Board.findById(boardId);
+
+    if (!board) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Board not found");
+    }
+
+    if (!board.hasAccess(userId)) {
+      throw new ApiError(httpStatus.FORBIDDEN, "Access denied to this board");
+    }
+
+    // Validate repository data
+    if (!repositoryData || !repositoryData.full_name) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid repository data");
+    }
+
+    await board.setGitHubRepository(repositoryData);
+
+    logger.info(
+      `GitHub repository ${repositoryData.full_name} linked to board ${boardId}`
+    );
+
+    return {
+      message: "GitHub repository linked successfully",
+      repository: repositoryData,
+    };
+  }
+
+  // Get GitHub repository for a board
+  async getBoardGitHubRepository(boardId, userId) {
+    const board = await Board.findById(boardId);
+
+    if (!board) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Board not found");
+    }
+
+    if (!board.hasAccess(userId)) {
+      throw new ApiError(httpStatus.FORBIDDEN, "Access denied to this board");
+    }
+
+    return {
+      repository: board.getGitHubRepository(),
+    };
+  }
+
+  // Remove GitHub repository from a board
+  async removeBoardGitHubRepository(boardId, userId) {
+    const board = await Board.findById(boardId);
+
+    if (!board) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Board not found");
+    }
+
+    if (!board.hasAccess(userId)) {
+      throw new ApiError(httpStatus.FORBIDDEN, "Access denied to this board");
+    }
+
+    await board.setGitHubRepository(null);
+
+    logger.info(`GitHub repository removed from board ${boardId}`);
+
+    return {
+      message: "GitHub repository removed successfully",
+    };
+  }
 }
 
-const setBoardGitHubRepository = async (boardId, userId, repositoryData) => {
-  const board = await Board.findById(boardId);
-
-  if (!board) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Board not found");
-  }
-
-  if (!board.hasAccess(userId)) {
-    throw new ApiError(httpStatus.FORBIDDEN, "Access denied to this board");
-  }
-
-  // Validate repository data
-  if (!repositoryData || !repositoryData.full_name) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Invalid repository data");
-  }
-
-  await board.setGitHubRepository(repositoryData);
-
-  logger.info(
-    `GitHub repository ${repositoryData.full_name} linked to board ${boardId}`
-  );
-
-  return {
-    message: "GitHub repository linked successfully",
-    repository: repositoryData,
-  };
-};
-
-const getBoardGitHubRepository = async (boardId, userId) => {
-  const board = await Board.findById(boardId);
-
-  if (!board) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Board not found");
-  }
-
-  if (!board.hasAccess(userId)) {
-    throw new ApiError(httpStatus.FORBIDDEN, "Access denied to this board");
-  }
-
-  return {
-    repository: board.getGitHubRepository(),
-  };
-};
-
-// Remove GitHub repository from a board
-const removeBoardGitHubRepository = async (boardId, userId) => {
-  const board = await Board.findById(boardId);
-
-  if (!board) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Board not found");
-  }
-
-  if (!board.hasAccess(userId)) {
-    throw new ApiError(httpStatus.FORBIDDEN, "Access denied to this board");
-  }
-
-  await board.setGitHubRepository(null);
-
-  logger.info(`GitHub repository removed from board ${boardId}`);
-
-  return {
-    message: "GitHub repository removed successfully",
-  };
-};
-
+// Create singleton instance
 const boardService = new BoardService();
 
-module.exports = boardService
+module.exports = boardService;
