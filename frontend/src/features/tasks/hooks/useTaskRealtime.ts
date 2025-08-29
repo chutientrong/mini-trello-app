@@ -2,12 +2,13 @@ import { useEffect } from 'react';
 import { useSocket } from '@/contexts/SocketProvider';
 import { useQueryClient } from '@tanstack/react-query';
 import { cardKeys } from '@/features/cards/hooks';
+import { taskKeys } from '../hooks';
 import type { Card, CardsResponse } from '@/features/cards/types';
 import type { Task } from '../types';
 
 interface UseTaskRealtimeProps {
   boardId: string;
-  cardId?: string; 
+  cardId?: string;
 }
 
 export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
@@ -30,7 +31,7 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
     if (logMessage) {
       console.log(logMessage);
     }
-    
+
     queryClient.setQueryData(
       cardKeys.list(boardId),
       (oldData: CardsResponse | undefined) => {
@@ -54,7 +55,7 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
   ) => {
     updateCardsCache(
       (cards) => cards.map((card) => 
-        card.id === cardId 
+        card.id === cardId
           ? { ...card, tasks: taskUpdater(card.tasks || []) }
           : card
       )
@@ -85,7 +86,7 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
     // Task created
     const handleTaskCreated = (data: { task: Task; timestamp: string }) => {
       console.log('Task created real-time:', data);
-      
+
       if (isCardInCache(data.task.cardId)) {
         updateCardTasks(
           data.task.cardId,
@@ -99,7 +100,7 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
     // Task updated
     const handleTaskUpdated = (data: { task: Task; timestamp: string }) => {
       console.log('Task updated real-time:', data);
-      
+
       if (isCardInCache(data.task.cardId)) {
         updateCardTasks(
           data.task.cardId,
@@ -110,12 +111,18 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
       } else {
         invalidateCardsCache('Card not in cache');
       }
+
+      // Update task detail cache
+      queryClient.setQueryData(
+        taskKeys.detail(data.task.boardId, data.task.cardId, data.task.id),
+        { task: data.task }
+      );
     };
 
     // Task deleted
     const handleTaskDeleted = (data: { taskId: string; cardId: string; timestamp: string }) => {
       console.log('Task deleted real-time:', data);
-      
+
       if (isCardInCache(data.cardId)) {
         updateCardTasks(
           data.cardId,
@@ -127,22 +134,22 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
     };
 
     // Task reordered
-    const handleTaskReordered = (data: { 
-      cardId: string; 
-      taskOrders: Array<{ taskId: string; order: number }>; 
+    const handleTaskReordered = (data: {
+      cardId: string;
+      taskOrders: Array<{ taskId: string; order: number }>;
       timestamp: string 
     }) => {
       console.log('Task reordered real-time:', data);
-      
+
       if (isCardInCache(data.cardId)) {
         updateCardTasks(
           data.cardId,
           (tasks) => {
-            const updatedTasks = tasks.map((task) => {
+          const updatedTasks = tasks.map((task) => {
               const newOrder = data.taskOrders.find(order => order.taskId === task.id);
-              return newOrder ? { ...task, order: newOrder.order } : task;
-            });
-            return sortTasksByOrder(updatedTasks);
+            return newOrder ? { ...task, order: newOrder.order } : task;
+          });
+          return sortTasksByOrder(updatedTasks);
           }
         );
       } else {
@@ -151,11 +158,11 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
     };
 
     // Task moved
-    const handleTaskMoved = (data: { 
-      taskId: string; 
-      sourceCardId: string; 
-      destCardId: string; 
-      newOrder: number; 
+    const handleTaskMoved = (data: {
+      taskId: string;
+      sourceCardId: string;
+      destCardId: string;
+      newOrder: number;
       task: Task;
       timestamp: string 
     }) => {
@@ -163,15 +170,15 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
       console.log('Current cardId:', cardId);
       console.log('Source cardId:', data.sourceCardId);
       console.log('Dest cardId:', data.destCardId);
-      
+
       const sourceCardInCache = isCardInCache(data.sourceCardId);
       const destCardInCache = isCardInCache(data.destCardId);
-      
+
       console.log('Cards cache:', getCardsCache());
       console.log('Cards in cache:', getCardsCache()?.data?.map(card => card.id));
       console.log('Destination card in cache:', destCardInCache);
       console.log('Source card in cache:', sourceCardInCache);
-      
+
       // If cardId is provided, handle specific card updates
       if (cardId) {
         if (data.sourceCardId === cardId && sourceCardInCache) {
@@ -191,10 +198,10 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
       } else {
         // If no cardId provided, handle board-level updates
         console.log('Handling board-level task move update');
-        
+
         if (sourceCardInCache && destCardInCache) {
           console.log('Moving task between cards (board-level cache update):', data.sourceCardId, '->', data.destCardId);
-          
+
           updateCardsCache(
             (cards) => cards.map((card) => {
               if (card.id === data.sourceCardId) {
@@ -226,7 +233,7 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
       action: 'assigned' | 'unassigned'
     ) => {
       console.log(`Member ${action} real-time:`, data);
-      
+
       if (isCardInCache(data.task.cardId)) {
         updateCardTasks(
           data.task.cardId,
@@ -237,6 +244,12 @@ export const useTaskRealtime = ({ boardId, cardId }: UseTaskRealtimeProps) => {
       } else {
         invalidateCardsCache('Card not in cache');
       }
+      
+      // Update task detail cache
+      queryClient.setQueryData(
+        taskKeys.detail(data.task.boardId, data.task.cardId, data.task.id),
+        { task: data.task }
+      );
     };
 
     const handleMemberAssigned = (data: { taskId: string; memberId: string; task: Task; timestamp: string }) => {

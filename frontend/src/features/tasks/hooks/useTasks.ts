@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { TasksAPI } from "../services";
 import type {
   TaskFilters,
@@ -55,6 +55,8 @@ export const useCreateTask = () => {
 };
 
 export const useUpdateTask = () => {
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: ({
       boardId,
@@ -67,6 +69,12 @@ export const useUpdateTask = () => {
       taskId: string;
       data: UpdateTaskRequest;
     }) => TasksAPI.updateTask(boardId, cardId, taskId, data),
+    onSuccess: (data, variables) => {
+      // Invalidate task detail query to refetch latest data
+      queryClient.invalidateQueries({
+        queryKey: taskKeys.detail(variables.boardId, variables.cardId, variables.taskId)
+      });
+    },
   });
 };
 

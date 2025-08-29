@@ -114,6 +114,7 @@ const TaskDetailModalComponent: React.FC<TaskDetailModalProps> = ({
 
   // Update title and description when task changes
   React.useEffect(() => {
+    console.log('TaskDetailModal: currentTask changed:', currentTask?.title);
     setTitle(currentTask?.title || "");
     setDescription(currentTask?.description || "");
     setPriority(currentTask?.priority || "medium");
@@ -134,8 +135,12 @@ const TaskDetailModalComponent: React.FC<TaskDetailModalProps> = ({
       return;
     }
     try {
+      console.log('Updating task title from:', currentTask.title, 'to:', title.trim());
       await onUpdateTask(currentTask.id, { title: title.trim() });
+      // Update local state immediately after successful update
+      setTitle(title.trim());
       setIsEditingTitle(false);
+      console.log('Task title updated successfully');
     } catch (error) {
       console.error("Failed to update task title:", error);
       setTitle(currentTask.title || "");
@@ -156,6 +161,7 @@ const TaskDetailModalComponent: React.FC<TaskDetailModalProps> = ({
 
     try {
       await onUpdateTask(currentTask.id, { description });
+      // Update local state immediately after successful update
       setIsEditingDescription(false);
     } catch (error) {
       console.error("Failed to update task description:", error);
@@ -359,7 +365,7 @@ const TaskDetailModalComponent: React.FC<TaskDetailModalProps> = ({
                     className="text-3xl font-semibold text-gray-900 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition-colors"
                     onClick={() => setIsEditingTitle(true)}
                   >
-                    {currentTask.title}
+                    {title}
                   </h2>
                 )}
               </div>
